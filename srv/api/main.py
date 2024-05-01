@@ -97,7 +97,7 @@ tokenizer = AutoTokenizer.from_pretrained('intfloat/multilingual-e5-large')
 model = AutoModel.from_pretrained('intfloat/multilingual-e5-large')
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-df = pd.read_csv("/data/row/train_dataset.csv")
+df = pd.read_csv("/data/row_files/dataset.csv")
 
 model.to(device)
 passage_embeddings = creake_embdiings()
@@ -175,7 +175,7 @@ SAIGA_MODEL_NAME = "IlyaGusev/saiga2_7b_lora"
 SAIGA_BASE_MODEL_PATH = "TheBloke/Llama-2-7B-fp16"
 # BASE_MODEL_PATH = "meta-llama/Llama-2-7b-hf"
 SAIGA_DEFAULT_MESSAGE_TEMPLATE = "<s>{role}\n{content}</s>\n"
-SAIGA_DEFAULT_SYSTEM_PROMPT = "Ты — Сайга, русскоязычный автоматический ассистент. Ты разговариваешь с людьми и помогаешь им."
+SAIGA_DEFAULT_SYSTEM_PROMPT = "Ты — Мария, русскоязычный автоматический ассистент Многофункционального центра предоставления государственных и муниципальных услуг. Ты разговариваешь с людьми и помогаешь им."
 
 
 class Conversation:
