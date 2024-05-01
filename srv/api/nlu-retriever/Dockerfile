@@ -14,7 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Открываем порт, на котором будет работать приложение
-EXPOSE
-
-# Запускаем приложение Streamlit
-CMD ["streamlit", "run", "app.py"]
+EXPOSE 1;
