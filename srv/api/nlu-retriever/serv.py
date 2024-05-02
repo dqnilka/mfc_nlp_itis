@@ -18,9 +18,7 @@ EMBEDDINGS_MODEL = "intfloat/multilingual-e5-large"  # v8-me5 on port 8003
 MODEL_FILE_NAME = "ggml-model-q4_1.bin"
 MODEL_REPO = "IlyaGusev/saiga_13b_lora_llamacpp"
 
-
-
-def populate_db() -> None:
+def populate_database() -> None:
     global CHROMADB_DIR, EMBEDDINGS_MODEL
 
     text_col_name = "text" if len(sys.argv) == 1 else sys.argv[1]
@@ -54,7 +52,7 @@ def __find_similar(query: str) -> List[Document]:
     ).similarity_search(query)
 
 
-def find_similar(question: str) -> dict[str, list[tuple[Any, Any]]]:
+def _find_similar_(question: str) -> dict[str, list[tuple[Any, Any]]]:
     global CHROMADB_DIR, EMBEDDINGS_MODEL
 
     docs = __find_similar(question)
@@ -92,12 +90,10 @@ def answer(question: str) -> Dict[str, str]:
     message = f"Контекст: {retrieved_docs}\n\nИспользуя контекст, ответь на вопрос: {question}"
     message_tokens = get_message_tokens(model, Token.USER.value, message)
     tokens.extend(message_tokens)
-    print("READY set context and query")
 
-    # add role tokens
+
     role_tokens = [model.token_bos(), Token.BOT.value, Token.LINEBREAK.value]
     tokens.extend(role_tokens)
-    print("READY set context and query")
 
     # summarize
     summary = ""
@@ -108,7 +104,6 @@ def answer(question: str) -> Dict[str, str]:
         summary += model.detokenize([token]).decode("utf-8", "ignore")
 
     print("READY summarize")
-    # print(f"Вопрос: {sys.argv[1]}\n")
     print(f"Вопрос: {question}\n")
     print(f"Ответ: {summary}\n")
     print("Источники:")

@@ -4,7 +4,6 @@ from typing import Dict, List, Optional
 from langchain.docstore.document import Document
 from langchain.document_loaders.base import BaseLoader
 
-
 class CustomCSVLoader(BaseLoader):
     def __init__(
         self,
