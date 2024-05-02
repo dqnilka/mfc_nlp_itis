@@ -8,7 +8,7 @@ BASE_MODEL_PATH = "TheBloke/Llama-2-7B-fp16"
 DEFAULT_MESSAGE_TEMPLATE = "<s>{role}\n{content}</s>\n"
 DEFAULT_SYSTEM_PROMPT = "ТТы — Мария, русскоязычный автоматический ассистент Многофункционального центра предоставления государственных и муниципальных услуг. Ты разговариваешь с людьми и помогаешь им."
 
-class Conversation:
+class Conversations:
     def __init__(
         self,
         message_template=DEFAULT_MESSAGE_TEMPLATE,
@@ -36,13 +36,13 @@ class Conversation:
             "content": message
         })
 
-    def add_bot_message(self, message):
+    def add_bot_messages(self, message):
         self.messages.append({
             "role": "bot",
             "content": message
         })
 
-    def get_prompt(self, tokenizer):
+    def get_prompts(self, tokenizer):
         final_text = ""
         for message in self.messages:
             message_text = self.message_template.format(**message)
@@ -51,7 +51,7 @@ class Conversation:
         return final_text.strip()
 
 
-def generate(model, tokenizer, prompt, generation_config):
+def generates(model, tokenizer, prompt, generation_config):
     data = tokenizer(prompt, return_tensors="pt")
     data = {k: v.to(model.device) for k, v in data.items()}
     output_ids = model.generate(

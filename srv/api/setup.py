@@ -14,14 +14,14 @@ setup(
     packages=find_packages(
         exclude=[f"{ROOT_PACKAGE}.tests", f"{ROOT_PACKAGE}.tests.*"]
     ),
-    entry_points={
+    entry_point={
         "console_scripts": [
             f"populate_db = {ROOT_PACKAGE}.serve:populate_db",
             f"find_similar = {ROOT_PACKAGE}.serve:find_similar",
             f"answer = {ROOT_PACKAGE}.serve:answer",
         ],
     },
-    install_requires=[
+    install_require=[
         # prod
         "chromadb==0.3.23",
         "huggingface-hub==0.14.1",
