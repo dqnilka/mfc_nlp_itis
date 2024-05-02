@@ -18,7 +18,7 @@ EMBEDDINGS_MODEL = "intfloat/multilingual-e5-large"  # v8-me5 on port 8003
 MODEL_FILE_NAME = "ggml-model-q4_1.bin"
 MODEL_REPO = "IlyaGusev/saiga_13b_lora_llamacpp"
 
-def populate_database() -> None:
+def by_p_db() -> None:
     global CHROMADB_DIR, EMBEDDINGS_MODEL
 
     text_col_name = "text" if len(sys.argv) == 1 else sys.argv[1]
@@ -52,7 +52,7 @@ def __find_similar(query: str) -> List[Document]:
     ).similarity_search(query)
 
 
-def _find_similar_(question: str) -> dict[str, list[tuple[Any, Any]]]:
+def by_find_similar_(question: str) -> dict[str, list[tuple[Any, Any]]]:
     global CHROMADB_DIR, EMBEDDINGS_MODEL
 
     docs = __find_similar(question)
@@ -66,8 +66,7 @@ def _find_similar_(question: str) -> dict[str, list[tuple[Any, Any]]]:
     }
 
 
-def answer(question: str) -> Dict[str, str]:
-
+def by_answer_(question: str) -> Dict[str, str]:
     docs = __find_similar(question)
     if len(docs) == 0:
         print("Ничего не найдено по вашему запросу")
