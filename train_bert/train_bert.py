@@ -1,18 +1,11 @@
-import pandas as pd
-import torch
-from sklearn.metrics import f1_score, recall_score, precision_score, classification_report
-from datasets import load_dataset
 import evaluate
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
-from torch.utils.data import DataLoader
-import torch
-from torch import nn
-import pandas as pd
 import numpy as np
-
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
+import torch
+from datasets import load_dataset
+from sklearn.metrics import f1_score, recall_score, precision_score, classification_report
+from torch import nn
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
 
 df = pd.read_csv('data/data.csv')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
