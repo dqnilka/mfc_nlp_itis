@@ -9,7 +9,6 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trai
 
 df = pd.read_csv('data/data.csv')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 class_weights = (1 - (df['labels'].value_counts().sort_index() / len(df))).values
 class_weights = torch.from_numpy(class_weights).float().to(device)
 
@@ -58,6 +57,8 @@ dataset_len = (dataset['train'].num_rows + dataset['test'].num_rows)
 optimizer = AdamW(model.parameters(), lr=2e-5)
 num_epochs = 3
 num_training_steps = num_epochs * dataset_len
+
+
 
 lr_scheduler = get_scheduler(
     "cosine",

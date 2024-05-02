@@ -30,13 +30,13 @@ class OutputData(BaseModel):
     prediction: str
 
 
-def average_pool(last_hidden_states: Tensor,
+def average_pools_date(last_hidden_states: Tensor,
                  attention_mask: Tensor) -> Tensor:
     last_hidden = last_hidden_states.masked_fill(~attention_mask[..., None].bool(), 0.0)
     return last_hidden.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
 
 
-def creake_embdiings() -> Tensor:
+def create_emmbdings() -> Tensor:
     files_embed = ['0_100',
                    '100_200',
                    '200_300',
@@ -83,7 +83,7 @@ def creake_embdiings() -> Tensor:
                 duplicate_indices.append((i, j))
 
     # Вывод результатов
-    if duplicate_indices:
+    if duplicate_ind:
         print("Найдены дубликаты:")
         for index_pair in duplicate_indices:
             print(f"Индексы {index_pair[0]} и {index_pair[1]}: {passage_embeddings_list[index_pair[0]]}")
@@ -108,7 +108,7 @@ app = FastAPI()
 
 
 @app.post("/find_similar", response_model=OutputData)
-def predict_find_similar(input_data: InputData):
+def pre_find_s(input_data: InputData):
     # Получаем входные параметры
     client_request = input_data.text
 
@@ -134,7 +134,7 @@ def predict_find_similar(input_data: InputData):
 
 
 @app.post("/new_find_similar", response_model=OutputData)
-def predict_new_find_similar(input_data: InputData):
+def pre_new_find_s(input_data: InputData):
     # Получаем входные параметры
     client_request = input_data.text
     try:
