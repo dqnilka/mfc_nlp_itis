@@ -17,6 +17,7 @@ import faiss
 import os
 from peft import PeftModel, PeftConfig
 
+
 # Класс для ведения диалога
 class SaigaConversation:
     def __init__(self, message_template, system_prompt, start_token_id, bot_token_id):
@@ -36,18 +37,23 @@ class SaigaConversation:
         prompt += tokenizer.decode([self.start_token_id, self.bot_token_id])
         return prompt.strip()
 
+
 # Модели данных для FastAPI
 class InputData(BaseModel):
     text: str
 
+
 class OutputData(BaseModel):
     prediction: str
+
 
 class ClassificationInputData(BaseModel):
     text: str
 
+
 class ClassificationOutputData(BaseModel):
     label: int
+
 
 # Функция для среднеарифметического пуллинга
 def average_pooling(hidden_states: Tensor, attention_mask: Tensor) -> Tensor:
@@ -56,14 +62,15 @@ def average_pooling(hidden_states: Tensor, attention_mask: Tensor) -> Tensor:
     )
     return masked_hidden_states.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
 
+
 # Функция для создания эмбеддингов
 def create_embeddings(
-    texts: List[str], model: AutoModel, tokenizer: AutoTokenizer, device: torch.device
+        texts: List[str], model: AutoModel, tokenizer: AutoTokenizer, device: torch.device
 ) -> Tensor:
     batch_size = 32
     embeddings = []
     for i in range(0, len(texts), batch_size):
-        batch_texts = texts[i : i + batch_size]
+        batch_texts = texts[i: i + batch_size]
         encoded_inputs = tokenizer(
             list(batch_texts), padding=True, truncation=True, return_tensors="pt"
         )
@@ -77,6 +84,7 @@ def create_embeddings(
         embeddings.append(batch_embeddings)
     return torch.cat(embeddings, dim=0)
 
+
 # Функция для классификации текста
 def classify_text(text):
     encoded_input = classification_tokenizer(
@@ -87,12 +95,14 @@ def classify_text(text):
     predicted_class_id = output.logits.argmax().item()
     return predicted_class_id
 
+
 # Функция для генерации ответа
 def generate_response(model, tokenizer, prompt, generation_config):
     input_ids = tokenizer(prompt, return_tensors="pt").to(model.device)
     output_ids = model.generate(**input_ids, generation_config=generation_config, temperature=0.001)[0]
-    output_ids = output_ids[len(input_ids["input_ids"][0]) :]
+    output_ids = output_ids[len(input_ids["input_ids"][0]):]
     return tokenizer.decode(output_ids, skip_special_tokens=True).strip()
+
 
 # Инициализация FastAPI приложения
 app = FastAPI()
@@ -145,6 +155,7 @@ classification_tokenizer = AutoTokenizer.from_pretrained(
     model_name, model_max_length=512
 )
 
+
 # Эндпоинт для генерации ответа с использованием Saiga
 @app.post("/saiga", response_model=OutputData)
 def generate_saiga_response(input_data: InputData):
@@ -174,6 +185,7 @@ def generate_saiga_response(input_data: InputData):
         saiga_model, saiga_tokenizer, saiga_prompt, saiga_generation_config
     )
     return OutputData(prediction=saiga_response)
+
 
 # Эндпоинт для классификации текста
 @app.post("/classify", response_model=ClassificationOutputData)
