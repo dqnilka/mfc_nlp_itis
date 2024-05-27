@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Чат-ИИ-МФЦ.iml" filepath="$PROJECT_DIR$/.idea/Чат-ИИ-МФЦ.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/mfc_nlp_itis.iml" filepath="$PROJECT_DIR$/.idea/mfc_nlp_itis.iml" />
     </modules>
   </component>
 </project>
