@@ -120,7 +120,7 @@ else:
 SAIGA_MODEL_NAME = "IlyaGusev/saiga2_7b_lora"
 SAIGA_BASE_MODEL_PATH = "TheBloke/Llama-2-7B-fp16"
 SAIGA_DEFAULT_MESSAGE_TEMPLATE = "<s>{role}\n{content}</s>\n"
-SAIGA_DEFAULT_SYSTEM_PROMPT = "Ты — Сайга, русскоязычный автоматический ассистент. Ты разговариваешь с людьми и помогаешь им."
+SAIGA_DEFAULT_SYSTEM_PROMPT = "Ты — Мария, русскоязычный автоматический ассистент. Ты разговариваешь с людьми и помогаешь относительно вопросов первой линии поддержки МФЦ."
 
 saiga_tokenizer = AutoTokenizer.from_pretrained(SAIGA_MODEL_NAME, use_fast=False)
 saiga_config = PeftConfig.from_pretrained(SAIGA_MODEL_NAME)
