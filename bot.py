@@ -69,7 +69,7 @@ def save_rating_to_db(user_name, rating, user_message, output_message):
 async def send_welcome(message):
     await bot.reply_to(
         message,
-        """\
+        """
     Привет, я МФЦ бот.
     Я подскажу тебе ответ на любой твой вопрос касающийся работы МФЦ\
     """,

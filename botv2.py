@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import datetime
 
 import telebot
 import time
@@ -12,8 +13,8 @@ from telebot import types
 
 from config import questions_dict
 from src.utils import answer_with_label
-
-# Replace with your bot's token
+# Импорт библиотеки для работы с PostgreSQL
+import psycopg2
 
 load_dotenv()
 
@@ -31,6 +32,8 @@ bot = telebot.TeleBot(token)
 
 # Замените на реальный ID оператора
 OPERATOR_ID = operator_id
+bot.user_question = None
+bot.user_answer = None
 
 help_msg = (
     "*Добро пожаловать в чат-бот поддержки!*\n\n"
@@ -56,6 +59,12 @@ def send_welcome(message):
         send_user_welcome(message)
 
 
+def generate_random_number(length=30):
+    digits = "0123456789"
+    random_number = ''.join(random.choices(digits, k=length))
+    return random_number
+
+
 def save_rating_to_db(user_name, rating, user_message, output_message):
     try:
         # Подключение к базе данных PostgreSQL
@@ -64,10 +73,17 @@ def save_rating_to_db(user_name, rating, user_message, output_message):
         )
         cur = conn.cursor()
         logger.info(f"New message: {user_message}")
+
+        # Генерация случайного числа
+        random_id = generate_random_number()
+
+        # Проверка типа данных перед кодированием
+        user_message = "test"
+        output_message = "test2"
         # Вставка данных в таблицу statistics
         cur.execute(
-            "INSERT INTO statistics (user_name, rating, message, output_message) VALUES (%s, %s, %s,  %s)",
-            (user_name, rating, user_message, output_message),
+            "INSERT INTO statistics (id, user_name, rating, message, output_message, created_at) VALUES (%s, %s, %s, %s, %s, %s)",
+            (int(random_id), str(user_name), int(rating), str(user_message), str(output_message), datetime.now())
         )
 
         # Фиксация изменений и закрытие подключения
@@ -128,7 +144,7 @@ def send_text_streaming(message):
             text = file.read()
 
         # Форматируем текст с использованием Markdown
-        formatted_text = f"*Ответ:* _{text}_"
+        formatted_text = f"*Результат: \n*_{text}_"
 
         time.sleep(2)
         # Отправляем отформатированное сообщение
@@ -142,7 +158,7 @@ def send_text_streaming(message):
         bot.send_message(message.chat.id, f"Произошла ошибка: {e}")
 
 
-def simulate_loading(chat_id, text, delay=1, iterations=15):
+def simulate_loading(chat_id, text, delay=1, iterations=1):
     message = bot.send_message(chat_id, text, parse_mode='Markdown')
     for i in range(iterations):
         time.sleep(delay)
@@ -156,39 +172,42 @@ def process_question(message):
     # Сохранение вопроса пользователя в контексте
     bot.answer_question = question
     # Здесь вы можете обработать вопрос пользователя
-    simulate_loading(message.chat.id, f"ℹ️ Ваш вопрос принят: \n «_{question}_».\n "
-                                      f"Начинаю формирование ответа, ожидайте.")
+    simulate_loading(message.chat.id, f"ℹ️ Ваш вопрос принят: \n «_{question}_».\n"
+                                      f"Начинаю формирование ответа, ожидайте")
 
     # Запрос на классификацию текста
     res_class = requests.post(f"{URL}/classify", json={"text": message.text})
 
     if res_class.status_code == 200:
         label = res_class.json()["label"]
-
         if label != 111:
             # Запрос на генерацию ответа
-            res_saiga = requests.post(f"{URL}/saiga", json={"text": message.text})
+            # res_saiga = requests.post(f"{URL}/saiga", json={"text": message.text})
 
-            if res_saiga.status_code == 200:
-                text = res_saiga.json()["prediction"]
-                t = answer_with_label(text, label)
-                file_path = "answer.txt"
+            # if res_saiga.status_code == 200:
+            #    text = res_saiga.json()["prediction"]
+            text = "Тест - Ответ"
+            t = answer_with_label(text, label)
+            file_path = "answer.txt"
 
-                # Открываем файл и читаем его
-                with open(file_path, "w", encoding="utf-8") as file:
-                    file.write(t)
-                send_text_streaming(message)
-            else:
-                logger.error(res_saiga.text)
-                bot.reply_to(message, "Произошла ошибка при обработке запроса.")
-        else:
-            bot.reply_to(
-                message,
-                "Кажется, я не совсем понял вопрос или он не относится к теме МФЦ. Не могли бы вы его уточнить?",
-            )
-    else:
-        logger.error(res_class.text)
-        bot.reply_to(message, "Произошла ошибка при обработке запроса.")
+            bot.user_answer = t
+            bot.user_question = message.text
+
+            # Открываем файл и читаем его
+            with open(file_path, "w", encoding="utf-8") as file:
+                file.write(t)
+            send_text_streaming(message)
+    #         else:
+    #             logger.error(res_saiga.text)
+    #             bot.reply_to(message, "Произошла ошибка при обработке запроса.")
+    #     else:
+    #         bot.reply_to(
+    #             message,
+    #             "Кажется, я не совсем понял вопрос или он не относится к теме МФЦ. Не могли бы вы его уточнить?",
+    #         )
+    # else:
+    #     logger.error(res_class.text)
+    #     bot.reply_to(message, "Произошла ошибка при обработке запроса.")
 
 
 def send_rating_request(message):
@@ -207,8 +226,7 @@ def show_main_buttons(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("❓ Задать вопрос")
     btn2 = types.KeyboardButton("📖 Помощь")
-    btn_back = types.KeyboardButton("◀️ Вернуться назад")
-    markup.add(btn1, btn2, btn_back)
+    markup.add(btn1, btn2)
     bot.send_message(message.chat.id, "Желаете узнать что-то еще?", reply_markup=markup)
 
 
@@ -376,14 +394,19 @@ def callback_rating(call):
         if call.from_user.username
         else call.from_user.first_name
     )
-    user_message = call.message.text
-    output_message = call.message.text
+    user_message = bot.user_question
+    output_message = bot.user_answer
+
+    print(username)
+    print(rating)
+    print(user_message)
+    print(output_message)
     if rating == '1':
         # Создание кнопки для отправки вопроса оператору
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("Направить вопрос оператору", callback_data="send_to_operator"))
         bot.send_message(call.message.chat.id, "Спасибо за оценку!", reply_markup=markup)
-        time.sleep(1)
+
         save_rating_to_db(username, rating, user_message, output_message)
     else:
         save_rating_to_db(username, rating, user_message, output_message)

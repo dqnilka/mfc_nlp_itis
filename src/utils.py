@@ -4,11 +4,5 @@ import os
 
 
 def answer_with_label(text, label):
-    ans = f"""Тема: {label2text[label]}
-    
-Ответ: {text}
-
-Пожалуйста, оцените мой ответ:"""
+    ans = f"Категория вопроса: {label2text[label]} \nОтвет на вопрос: \n{text}"
     return ans
-
-
