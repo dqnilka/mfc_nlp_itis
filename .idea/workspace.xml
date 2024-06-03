@@ -5,22 +5,61 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52fd43cd-5c55-4b76-8564-94a802959cb2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-350/config.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-350/model.safetensors" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/answer.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/botv2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/faiss/faiss_index.pkl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/finetuned_labse_model.pth" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/torch_conf.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-350/special_tokens_map.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-350/tokenizer.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-350/tokenizer_config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-350/trainer_state.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-350/training_args.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-350/vocab.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-750/config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-750/model.safetensors" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-750/special_tokens_map.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-750/tokenizer.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-750/tokenizer_config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-750/trainer_state.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-750/training_args.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/checkpoint-750/vocab.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/runs/May01_03-12-14_1134e1a85def/events.out.tfevents.1714522335.1134e1a85def.7483.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/runs/May01_03-30-00_1134e1a85def/events.out.tfevents.1714523400.1134e1a85def.2271.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/runs/May01_03-32-18_1134e1a85def/events.out.tfevents.1714523539.1134e1a85def.2719.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/runs/May01_03-44-56_1134e1a85def/events.out.tfevents.1714524296.1134e1a85def.2661.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_bert/results/runs/May01_16-38-05_1134e1a85def/events.out.tfevents.1714570685.1134e1a85def.2325.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_labse/data/test_dataset.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_labse/data/train_dataset_Датасет.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_labse/finetuned_labse_model.pth" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_bert/train_bert.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/train_bert/train_bert.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_labse/labse_train.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/train_labse/labse_train.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="2h3wNUMsbNpD5zHjkR9a9MuFgts" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -32,10 +71,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Docker.docker-compose.yml: Compose Deployment.executor": "Run",
+    "Python.botv2.executor": "Run",
     "Python.download_bert.executor": "Run",
     "Python.main.executor": "Run",
+    "Python.torch_conf.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
+    "last_opened_file_path": "D:/NLP_Bot/mfc_nlp_itis",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -44,7 +87,37 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\NLP_Bot\mfc_nlp_itis" />
+      <recent name="D:\NLP_Bot\mfc_nlp_itis\train_labse" />
+      <recent name="D:\NLP_Bot\mfc_nlp_itis\train_labse\data" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.botv2">
+    <configuration name="botv2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mfc_nlp_itis" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/botv2.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="download_bert" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="mfc_nlp_itis" />
       <option name="ENV_FILES" value="" />
@@ -91,9 +164,50 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="torch_conf" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mfc_nlp_itis" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_conf.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker-compose.yml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="envFilePath" value="" />
+          <option name="sourceFilePath" value="docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.botv2" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.torch_conf" />
+        <item itemvalue="Docker.docker-compose.yml: Compose Deployment" />
         <item itemvalue="Python.download_bert" />
       </list>
     </recent_temporary>
@@ -115,6 +229,16 @@
       <option name="presentableId" value="Default" />
       <updated>1716836030367</updated>
       <workItem from="1716836031055" duration="3934000" />
+      <workItem from="1716918146881" duration="2835000" />
+      <workItem from="1716923610138" duration="7936000" />
+      <workItem from="1717006516003" duration="3739000" />
+      <workItem from="1717011204538" duration="8925000" />
+      <workItem from="1717238887770" duration="2090000" />
+      <workItem from="1717244103343" duration="10432000" />
+      <workItem from="1717330565180" duration="923000" />
+      <workItem from="1717336199285" duration="2761000" />
+      <workItem from="1717340810361" duration="9368000" />
+      <workItem from="1717350582610" duration="21523000" />
     </task>
     <servers />
   </component>
@@ -125,7 +249,9 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/mfc_nlp_itis$main.coverage" NAME="main Coverage Results" MODIFIED="1716838032999" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/mfc_nlp_itis$download_bert.coverage" NAME="download_bert Coverage Results" MODIFIED="1716837799663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/train_bert" />
+    <SUITE FILE_PATH="coverage/mfc_nlp_itis$main.coverage" NAME="main Coverage Results" MODIFIED="1717349649518" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/mfc_nlp_itis$download_bert.coverage" NAME="download_bert Coverage Results" MODIFIED="1717246708348" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/train_bert" />
+    <SUITE FILE_PATH="coverage/mfc_nlp_itis$torch_conf.coverage" NAME="torch_conf Coverage Results" MODIFIED="1717349535285" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/mfc_nlp_itis$botv2.coverage" NAME="botv2 Coverage Results" MODIFIED="1717449395096" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

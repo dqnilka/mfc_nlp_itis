@@ -118,7 +118,7 @@ celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
-
+train_labse/finetuned_labse_model.pth
 # Environments
 .env
 .venv
