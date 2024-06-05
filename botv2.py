@@ -12,6 +12,7 @@ from sqlalchemy.dialects.postgresql import psycopg2
 from telebot import types
 
 from config import questions_dict
+from src.constants import label2text
 from src.utils import answer_with_label
 # Импорт библиотеки для работы с PostgreSQL
 import psycopg2
@@ -26,14 +27,14 @@ db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
 URL = os.getenv("URL")
 token = os.getenv("API_TOKEN")
-operator_id = os.getenv("OPERATOR_ID")
 
 bot = telebot.TeleBot(token)
 
 # Замените на реальный ID оператора
-OPERATOR_ID = operator_id
+OPERATOR_ID = "6981121985"
 bot.user_question = None
 bot.user_answer = None
+bot.category = None
 
 help_msg = (
     "*Добро пожаловать в чат-бот поддержки!*\n\n"
@@ -53,37 +54,74 @@ logging.basicConfig(filename="bot.log", encoding="utf-8", level=logging.DEBUG)
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     logger.info(f"New message: {message.text}")
-    if message.from_user.id == OPERATOR_ID:
+    if str(message.from_user.id) == OPERATOR_ID:
+        print("operator")
         send_operator_welcome(message)
     else:
+        print("user")
         send_user_welcome(message)
 
 
-def generate_random_number(length=30):
+def generate_random_number(length=7):
     digits = "0123456789"
     random_number = ''.join(random.choices(digits, k=length))
     return random_number
 
 
-def save_rating_to_db(user_name, rating, user_message, output_message):
+def save_rating_to_db(user_name, rating, user_message, output_message, category):
     try:
-        # Подключение к базе данных PostgreSQL
-        conn = psycopg2.connect(
-            host=db_host, database=db_name, user=db_user, password=db_password
-        )
-        cur = conn.cursor()
-        logger.info(f"New message: {user_message}")
-
-        # Генерация случайного числа
         random_id = generate_random_number()
 
-        # Проверка типа данных перед кодированием
-        user_message = "test"
-        output_message = "test2"
-        # Вставка данных в таблицу statistics
+        conn = psycopg2.connect(
+            database="postgres", user="postgres", password="postgres"
+        )
+
+        cur = conn.cursor()
+
+        logger.info(f"New message: {user_message}")
+        user_name = user_name.encode('utf-8', errors='ignore').decode('utf-8')
+        user_message = user_message.encode('utf-8', errors='ignore').decode('utf-8')
+        output_message = output_message.encode('utf-8', errors='ignore').decode('utf-8')
+
+        # Печать данных перед вставкой
+        print(
+            f"Inserting into DB: {random_id}, {user_name}, {rating}, {user_message}, {output_message}, {datetime.now()}")
+
         cur.execute(
-            "INSERT INTO statistics (id, user_name, rating, message, output_message, created_at) VALUES (%s, %s, %s, %s, %s, %s)",
-            (int(random_id), str(user_name), int(rating), str(user_message), str(output_message), datetime.now())
+            "INSERT INTO statistics (id, user_name, rating, message, output_message, created_at, category) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (random_id, user_name, rating, user_message, output_message, datetime.now(), category)
+        )
+
+        # Фиксация изменений и закрытие подключения
+        conn.commit()
+        cur.close()
+        conn.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Ошибка при сохранении оценки в базу данных:", error)
+
+
+def save_bd_que_to_db(user_name, rating, user_message, output_message, category):
+    try:
+        random_id = generate_random_number()
+
+        conn = psycopg2.connect(
+            database="postgres", user="postgres", password="postgres"
+        )
+
+        cur = conn.cursor()
+
+        logger.info(f"New message: {user_message}")
+        user_name = user_name.encode('utf-8', errors='ignore').decode('utf-8')
+        user_message = user_message.encode('utf-8', errors='ignore').decode('utf-8')
+        output_message = output_message.encode('utf-8', errors='ignore').decode('utf-8')
+
+        # Печать данных перед вставкой
+        print(
+            f"Inserting into DB: {random_id}, {user_name}, {rating}, {user_message}, {output_message}, {datetime.now()}")
+
+        cur.execute(
+            "INSERT INTO bad_questions (id, user_name, rating, message, output_message, created_at) VALUES (%s, %s, %s, %s, %s, %s)",
+            (random_id, user_name, rating, user_message, output_message, datetime.now())
         )
 
         # Фиксация изменений и закрытие подключения
@@ -124,7 +162,7 @@ def send_operator_welcome(message):
 @bot.message_handler(func=lambda message: message.text == "❓ Задать вопрос")
 def ask_question(message):
     logger.info(f"New message: {message.text}")
-    if message.from_user.id == OPERATOR_ID:
+    if str(message.from_user.id) == OPERATOR_ID:
         bot.send_message(message.chat.id, "Эта команда недоступна для оператора.")
     else:
         hide_markup = types.ReplyKeyboardRemove()
@@ -146,7 +184,6 @@ def send_text_streaming(message):
         # Форматируем текст с использованием Markdown
         formatted_text = f"*Результат: \n*_{text}_"
 
-        time.sleep(2)
         # Отправляем отформатированное сообщение
         bot.send_message(message.chat.id, formatted_text, parse_mode='Markdown')
 
@@ -158,7 +195,7 @@ def send_text_streaming(message):
         bot.send_message(message.chat.id, f"Произошла ошибка: {e}")
 
 
-def simulate_loading(chat_id, text, delay=1, iterations=1):
+def simulate_loading(chat_id, text, delay=1, iterations=3):
     message = bot.send_message(chat_id, text, parse_mode='Markdown')
     for i in range(iterations):
         time.sleep(delay)
@@ -172,7 +209,7 @@ def process_question(message):
     # Сохранение вопроса пользователя в контексте
     bot.answer_question = question
     # Здесь вы можете обработать вопрос пользователя
-    simulate_loading(message.chat.id, f"ℹ️ Ваш вопрос принят: \n «_{question}_».\n"
+    simulate_loading(message.chat.id, f"ℹ️ *Ваш вопрос принят:* \n «_{question}_».\n\n\n"
                                       f"Начинаю формирование ответа, ожидайте")
 
     # Запрос на классификацию текста
@@ -182,32 +219,36 @@ def process_question(message):
         label = res_class.json()["label"]
         if label != 111:
             # Запрос на генерацию ответа
-            # res_saiga = requests.post(f"{URL}/saiga", json={"text": message.text})
+            res_saiga = requests.post(f"{URL}/saiga", json={"text": message.text})
 
-            # if res_saiga.status_code == 200:
-            #    text = res_saiga.json()["prediction"]
-            text = "Тест - Ответ"
-            t = answer_with_label(text, label)
-            file_path = "answer.txt"
+            if res_saiga.status_code == 200:
+                text = res_saiga.json()["prediction"]
+                # text = "Тестовый ответ чат-бота"
+                answer = answer_with_label(text, label)
+                file_path = "answer.txt"
 
-            bot.user_answer = t
-            bot.user_question = message.text
+                bot.user_answer = text
+                bot.category = label2text[label]
+                bot.user_question = message.text
 
-            # Открываем файл и читаем его
-            with open(file_path, "w", encoding="utf-8") as file:
-                file.write(t)
-            send_text_streaming(message)
-    #         else:
-    #             logger.error(res_saiga.text)
-    #             bot.reply_to(message, "Произошла ошибка при обработке запроса.")
-    #     else:
-    #         bot.reply_to(
-    #             message,
-    #             "Кажется, я не совсем понял вопрос или он не относится к теме МФЦ. Не могли бы вы его уточнить?",
-    #         )
-    # else:
-    #     logger.error(res_class.text)
-    #     bot.reply_to(message, "Произошла ошибка при обработке запроса.")
+                # Открываем файл и читаем его
+                with open(file_path, "w", encoding="utf-8") as file:
+                    file.write(answer)
+                send_text_streaming(message)
+            else:
+                logger.error(res_saiga.text)
+                bot.reply_to(message, "Произошла ошибка при обработке запроса.")
+        else:
+            bot.reply_to(
+                message,
+                "Кажется, я не совсем понял вопрос или он не относится к теме МФЦ. Не могли бы вы его уточнить?",
+            )
+    else:
+        logger.error(res_class.text)
+        bot.reply_to(message, "Произошла ошибка при обработке запроса.")
+
+
+
 
 
 def send_rating_request(message):
@@ -237,7 +278,6 @@ def show_operator_buttons(message):
     btn2 = types.KeyboardButton("❓ Просмотреть вопросы")
     btn_back = types.KeyboardButton("◀️ Вернуться назад")
     markup.add(btn1, btn2, btn_back)
-    bot.send_message(message.chat.id, "Желаете узнать что-то еще?", reply_markup=markup)
 
 
 # Функция для отображения категорий для просмотра статистики
@@ -256,7 +296,7 @@ def show_statistics_categories(message):
 def show_questions_categories(message):
     logger.info(f"New message: {message.text}")
     markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    categories = ["Детская карта", "Паспорт", "ЗАГС", "Строительство", "Выплаты", "Налоги", "Лицензии"]
+    categories = ["Детская карта", "Паспорт", "ЗАГС", "Строительство", "Выплаты", "Налоги", "ЕВД"]
     buttons = [types.KeyboardButton(category) for category in categories]
     btn_back = types.KeyboardButton("◀️ Вернуться назад")
     markup.add(*buttons, btn_back)
@@ -265,7 +305,7 @@ def show_questions_categories(message):
 
 # Обработчик кнопки "Просмотреть статистику" (для оператора)
 @bot.message_handler(
-    func=lambda message: message.text == "📊 Просмотреть статистику" and message.from_user.id == OPERATOR_ID)
+    func=lambda message: message.text == "📊 Просмотреть статистику" and str(message.from_user.id) == OPERATOR_ID)
 def view_statistics(message):
     logger.info(f"New message: {message.text}")
     show_statistics_categories(message)
@@ -273,48 +313,128 @@ def view_statistics(message):
 
 # Обработчик кнопки "Просмотреть вопросы" (для оператора)
 @bot.message_handler(
-    func=lambda message: message.text == "❓ Просмотреть вопросы" and message.from_user.id == OPERATOR_ID)
+    func=lambda message: message.text == "❓ Просмотреть вопросы" and str(message.from_user.id) == OPERATOR_ID)
 def view_questions(message):
     logger.info(f"New message: {message.text}")
     show_questions_categories(message)
 
 
 # Обработчик выбора категории для вопросов
+
+
+def fetch_questions_by_category(category):
+    try:
+        # Подключение к базе данных PostgreSQL
+        conn = psycopg2.connect(
+            database="postgres", user="postgres", password="postgres"
+        )
+        cur = conn.cursor()
+
+        cur.execute("SELECT id, question FROM operator_questions WHERE category = %s", (category,))
+        questions = cur.fetchall()
+
+        cur.close()
+        conn.close()
+        return questions
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Ошибка при извлечении вопросов из базы данных:", error)
+        return []
+
+
+def fetch_full_question_and_answer(question_id):
+    try:
+        conn = psycopg2.connect(
+            database="postgres", user="postgres", password="postgres"
+        )
+        cur = conn.cursor()
+
+        cur.execute("SELECT question, bot_answer FROM operator_questions WHERE id = %s", (question_id,))
+        result = cur.fetchone()
+
+        cur.close()
+        conn.close()
+        return result
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Ошибка при извлечении полного вопроса и ответа из базы данных:", error)
+        return None
+
+
+def save_operator_response(question_id, response):
+    try:
+        # Подключение к базе данных PostgreSQL
+        conn = psycopg2.connect(
+            database="postgres", user="postgres", password="postgres"
+        )
+        cur = conn.cursor()
+
+        cur.execute("SELECT user_id, question, category FROM operator_questions WHERE id = %s", (question_id,))
+        result = cur.fetchone()
+        user_id = result[0]
+        question = result[1]
+        category = result[1]
+
+        # Сохраняем ответ в таблицу statistics с рейтингом 5
+        random_id = generate_random_number()
+        cur.execute(
+            "INSERT INTO statistics (id, user_name, rating, message, output_message, created_at, category) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (random_id, user_id, 5, question, response, datetime.now(), category)
+        )
+
+        # Удаление вопроса из operator_questions после ответа
+        cur.execute("DELETE FROM operator_questions WHERE id = %s", (question_id,))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        # Отправляем ответ пользователю
+        bot.send_message(user_id, f"✅ Получен ответ по вашему вопросу: «{question}». \n\n\n*Ответ:* {response}",
+                         parse_mode='Markdown')
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Ошибка при сохранении ответа оператора в базе данных:", error)
+
+
 @bot.message_handler(
     func=lambda message: message.text in ["Детская карта", "Паспорт", "ЗАГС", "Строительство", "Выплаты", "Налоги",
-                                          "Лицензии"])
+                                          "ЕДВ"])
 def handle_category_q_selection(message):
     logger.info(f"New message: {message.text}")
     category = message.text
-    if category in questions_dict:
+    questions = fetch_questions_by_category(category)
+    if questions:
         markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-        questions = questions_dict[category]  # Получение списка вопросов для выбранной категории
-        buttons = [types.KeyboardButton(question) for question in questions]
+        buttons = [types.KeyboardButton(f"{q[1][:30]}... (ID: {q[0]})") for q in questions]
         btn_back = types.KeyboardButton("◀️ Вернуться назад")
         markup.add(*buttons, btn_back)
         bot.send_message(message.chat.id, "Выберите вопрос:", reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id, "В данной категории нет вопросов.")
 
 
-# Обработчик выбора вопроса для ответа
-@bot.message_handler(func=lambda message: message.text in sum(questions_dict.values(), []))
+@bot.message_handler(func=lambda message: "(ID:" in message.text)
 def handle_question_selection(message):
     logger.info(f"New message: {message.text}")
-    time.sleep(1)
-    question = message.text
-    bot.selected_question = question
-    time.sleep(1)
-    bot.send_message(message.chat.id, f"*Вопрос:* {question}\n\n"
-                                      "Напишите ответ в текущий чат, чтобы автоматически ответить пользователю.",
-                     parse_mode='Markdown')
-    bot.register_next_step_handler(message, handle_operator_response)
+    question_id = int(message.text.split("(ID:")[1].split(")")[0])
+    bot.selected_question_id = question_id
+    question_and_answer = fetch_full_question_and_answer(question_id)
+    if question_and_answer:
+        full_question, bot_answer = question_and_answer
+        bot.send_message(message.chat.id,
+                         f"*Вопрос пользователя:* {full_question}\n\n*Ответ чат-бота:* {bot_answer}\n\n*Напишите свой ответ:*",
+                         parse_mode='Markdown')
+        bot.register_next_step_handler(message, handle_operator_response)
+    else:
+        bot.send_message(message.chat.id, "Не удалось извлечь данные вопроса и ответа.")
 
 
 def handle_operator_response(message):
     logger.info(f"New message: {message.text}")
     response = message.text
-    time.sleep(2)
+    save_operator_response(bot.selected_question_id, response)
     bot.send_message(message.chat.id, "✅ Ваш ответ был успешно отправлен пользователю и добавлен в базу знаний.")
-    # Здесь можно добавить код для отправки ответа пользователю и сохранения в базу знаний.
+
+
+# Запуск бота
 
 
 # Обработчик выбора категории для статистики
@@ -325,7 +445,7 @@ def handle_operator_response(message):
 def handle_category_selection(message):
     logger.info(f"New message: {message.text}")
     category = message.text
-    if message.from_user.id == OPERATOR_ID:
+    if str(message.from_user.id) == OPERATOR_ID:
         if category in ["Стаститка: Детская карта", "Стаститка: Паспорт", "Стаститка: ЗАГС", "Стаститка: Строительство",
                         "Стаститка: Выплаты", "Стаститка: Налоги", "Стаститка: Общая статистика",
                         "Стаститка: Лицензии"]:
@@ -346,7 +466,7 @@ def handle_category_selection(message):
 @bot.message_handler(func=lambda message: message.text == "📖 Помощь")
 def help_message(message):
     logger.info(f"New message: {message.text}")
-    if message.from_user.id == OPERATOR_ID:
+    if str(message.from_user.id) == OPERATOR_ID:
         bot.send_message(message.chat.id, "Эта команда недоступна для оператора.")
     else:
         bot.send_message(message.chat.id,
@@ -376,7 +496,7 @@ def new_question(message):
 @bot.message_handler(func=lambda message: message.text == "◀️ Вернуться назад")
 def go_back(message):
     logger.info(f"New message: {message.text}")
-    if message.from_user.id == OPERATOR_ID:
+    if str(message.from_user.id) == OPERATOR_ID:
         send_operator_welcome(message)
     else:
         send_user_welcome(message)
@@ -396,37 +516,52 @@ def callback_rating(call):
     )
     user_message = bot.user_question
     output_message = bot.user_answer
-
-    print(username)
-    print(rating)
-    print(user_message)
-    print(output_message)
+    category = bot.category
     if rating == '1':
         # Создание кнопки для отправки вопроса оператору
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("Направить вопрос оператору", callback_data="send_to_operator"))
         bot.send_message(call.message.chat.id, "Спасибо за оценку!", reply_markup=markup)
 
-        save_rating_to_db(username, rating, user_message, output_message)
+        save_bd_que_to_db(username, rating, user_message, output_message, category)
     else:
-        save_rating_to_db(username, rating, user_message, output_message)
+        save_rating_to_db(username, rating, user_message, output_message, category)
         bot.send_message(call.message.chat.id, "Спасибо за оценку!")
-        if call.from_user.id == OPERATOR_ID:
+        if str(call.from_user.id) == OPERATOR_ID:
             show_operator_buttons(call.message)
-            time.sleep(1)
         else:
             show_main_buttons(call.message)
-            time.sleep(1)
 
 
 # Обработчик кнопки "Направить вопрос оператору"
 @bot.callback_query_handler(func=lambda call: call.data == "send_to_operator")
 def send_to_operator(call):
-    question = bot.answer_question  # Получение сохраненного вопроса пользователя
-    time.sleep(2)
-    bot.send_message(call.message.chat.id, f"Ваш вопрос: «_{question}_», был успешно отправлен оператору МФЦ. "
-                                           f"Ответ будет направлен в текущий чат после того, как будет сформулирован.",
-                     parse_mode='Markdown')
+    question = bot.user_question  # Получение сохраненного вопроса пользователя
+    category = bot.category
+    user_id = call.from_user.id
+    answer = bot.user_answer
+    try:
+        conn = psycopg2.connect(
+            database="postgres", user="postgres", password="postgres"
+        )
+        cur = conn.cursor()
+        logger.info(f"db wr user_question: {question}")
+        insert_query = """
+          INSERT INTO operator_questions (user_id, question, category, bot_answer)
+          VALUES (%s, %s, %s, %s);
+          """
+        cur.execute(insert_query, (user_id, question, category, answer))
+
+        conn.commit()
+
+        cur.close()
+        conn.close()
+        bot.send_message(call.message.chat.id, f"Ваш вопрос: «_{question}_», был успешно отправлен оператору МФЦ. "
+                                               f"Ответ будет направлен в текущий чат после того, как будет сформулирован.",
+                         parse_mode='Markdown')
+    except (Exception, psycopg2.DatabaseError) as error:
+        bot.send_message(call.message.chat.id, f"Произошла ошибка при отправке вопроса оператору: {error}")
+
     show_main_buttons(call.message)
 
 

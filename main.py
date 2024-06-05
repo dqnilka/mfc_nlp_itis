@@ -116,7 +116,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 app = FastAPI()
 
 # Загрузка токенизатора и модели для создания эмбеддингов
-embed_tokenizer = AutoTokenizer.from_pretrained("intfloat/ ")
+embed_tokenizer = AutoTokenizer.from_pretrained("intfloat/multilingual-e5-small")
 embed_model = AutoModel.from_pretrained("intfloat/multilingual-e5-small").to(device)
 
 # # Загрузка весов модели из локального файла
