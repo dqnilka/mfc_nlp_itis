@@ -79,9 +79,6 @@ def save_rating_to_db(user_name, rating, user_message, output_message, category)
         cur = conn.cursor()
 
         logger.info(f"New message: {user_message}")
-        user_name = user_name.encode('utf-8', errors='ignore').decode('utf-8')
-        user_message = user_message.encode('utf-8', errors='ignore').decode('utf-8')
-        output_message = output_message.encode('utf-8', errors='ignore').decode('utf-8')
 
         # Печать данных перед вставкой
         print(
@@ -120,10 +117,9 @@ def save_bd_que_to_db(user_name, rating, user_message, output_message, category)
             f"Inserting into DB: {random_id}, {user_name}, {rating}, {user_message}, {output_message}, {datetime.now()}")
 
         cur.execute(
-            "INSERT INTO bad_questions (id, user_name, rating, message, output_message, created_at) VALUES (%s, %s, %s, %s, %s, %s)",
-            (random_id, user_name, rating, user_message, output_message, datetime.now())
+            "INSERT INTO bad_questions (id, user_name, rating, message, output_message, created_at, category) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (random_id, user_name, rating, user_message, output_message, datetime.now(), category)
         )
-
         # Фиксация изменений и закрытие подключения
         conn.commit()
         cur.close()
@@ -248,9 +244,6 @@ def process_question(message):
         bot.reply_to(message, "Произошла ошибка при обработке запроса.")
 
 
-
-
-
 def send_rating_request(message):
     logger.info(f"New message: {message.text}")
     # Создание кнопок для оценки в одну строку
@@ -371,7 +364,7 @@ def save_operator_response(question_id, response):
         result = cur.fetchone()
         user_id = result[0]
         question = result[1]
-        category = result[1]
+        category = result[2]
 
         # Сохраняем ответ в таблицу statistics с рейтингом 5
         random_id = generate_random_number()
@@ -420,7 +413,7 @@ def handle_question_selection(message):
     if question_and_answer:
         full_question, bot_answer = question_and_answer
         bot.send_message(message.chat.id,
-                         f"*Вопрос пользователя:* {full_question}\n\n*Ответ чат-бота:* {bot_answer}\n\n*Напишите свой ответ:*",
+                         f"*Вопрос пользователя:* {full_question}\n\n*Ответ чат-бота:* {bot_answer}\n\n*Напишите свой ответ в чат с ботом.*",
                          parse_mode='Markdown')
         bot.register_next_step_handler(message, handle_operator_response)
     else:
