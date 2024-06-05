@@ -549,8 +549,8 @@ def send_to_operator(call):
 
         cur.close()
         conn.close()
-        bot.send_message(call.message.chat.id, f"Ваш вопрос: «_{question}_», был успешно отправлен оператору МФЦ. "
-                                               f"Ответ будет направлен в текущий чат после того, как будет сформулирован.",
+        bot.send_message(call.message.chat.id, f"*Ваш вопрос:* «_{question}_», был успешно отправлен оператору МФЦ.\n\n\n"
+                                               f"Ответ будет направлен в текущий чат после того, как будет оператор на него ответит.",
                          parse_mode='Markdown')
     except (Exception, psycopg2.DatabaseError) as error:
         bot.send_message(call.message.chat.id, f"Произошла ошибка при отправке вопроса оператору: {error}")
