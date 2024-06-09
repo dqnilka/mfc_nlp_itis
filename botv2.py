@@ -74,12 +74,12 @@ def generate_random_number(length=7):
     random_number = ''.join(random.choices(digits, k=length))
     return random_number
 
+
 def handle_random_message(message):
     logger.info(f"Random message: {message.text}")
     # Выбираем случайный ответ из списка
     response = random.choice(random_responses)
     bot.send_message(message.chat.id, response)
-
 
 
 def save_rating_to_db(user_name, rating, user_message, output_message, category):
@@ -224,16 +224,18 @@ def process_question(message):
 
     # Запрос на классификацию текста
     res_class = requests.post(f"{URL}/classify", json={"text": message.text})
-
+    print(res_class)
     if res_class.status_code == 200:
         label = res_class.json()["label"]
-        if label != 111:
+        print(label)
+        if label != (-1):
             # Запрос на генерацию ответа
-            res_saiga = requests.post(f"{URL}/saiga", json={"text": message.text})
+            # res_saiga = requests.post(f"{URL}/saiga", json={"text": message.text})
 
-            if res_saiga.status_code == 200:
-                text = res_saiga.json()["prediction"]
-                # text = "Тестовый ответ чат-бота"
+            # if res_saiga.status_code == 200:
+            if 1 == 1:
+                # text = res_saiga.json()["prediction"]
+                text = "Тестовый ответ чат-бота"
                 answer = answer_with_label(text, label)
                 file_path = "answer.txt"
 
@@ -574,10 +576,12 @@ def send_to_operator(call):
 def handle_all_messages(message):
     # Проверяем, если сообщение не относится ни к одной из зарегистрированных команд
     if not any(
-        command in message.text.lower()
-        for command in ["/start", "/help", "❓ Задать вопрос", "📖 Помощь", "📊 Просмотреть статистику", "❓ Просмотреть вопросы"]
+            command in message.text.lower()
+            for command in
+            ["/start", "/help", "❓ Задать вопрос", "📖 Помощь", "📊 Просмотреть статистику", "❓ Просмотреть вопросы"]
     ):
         handle_random_message(message)
+
 
 # Запуск бота
 bot.polling()

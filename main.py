@@ -18,6 +18,13 @@ import os
 from peft import PeftModel, PeftConfig
 
 
+def get_device_map() -> str:
+    return 'cuda' if torch.cuda.is_available() else 'cpu'
+
+
+device = get_device_map()
+
+
 # Класс для ведения диалога
 class SaigaConversation:
     def __init__(self, message_template, system_prompt, start_token_id, bot_token_id):
@@ -55,13 +62,6 @@ class ClassificationOutputData(BaseModel):
     label: int
 
 
-def get_device_map() -> str:
-    return 'cuda' if torch.cuda.is_available() else 'cpu'
-
-
-device = get_device_map()
-
-
 # Функция для среднеарифметического пуллинга
 def average_pooling(hidden_states: Tensor, attention_mask: Tensor) -> Tensor:
     masked_hidden_states = hidden_states.masked_fill(
@@ -93,14 +93,17 @@ def create_embeddings(
 
 
 # Функция для классификации текста
-def classify_text(text):
+def classify_text(text, threshold):
     encoded_input = classification_tokenizer(
         text, return_tensors="pt", padding=True, truncation=True
     ).to("cpu")
     with torch.no_grad():
         output = classification_model(**encoded_input)
-    predicted_class_id = output.logits.argmax().item()
-    return predicted_class_id
+    probs = torch.nn.functional.softmax(output.logits, dim=-1)
+    max_prob, predicted_class_id = torch.max(probs, dim=-1)
+    if max_prob.item() < threshold:
+        return -1  # Возвращаем -1, если максимальная вероятность ниже порога
+    return predicted_class_id.item()
 
 
 # Функция для генерации ответа
@@ -111,7 +114,6 @@ def generate_response(model, tokenizer, prompt, generation_config):
     return tokenizer.decode(output_ids, skip_special_tokens=True).strip()
 
 
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 # Инициализация FastAPI приложения
 app = FastAPI()
 
@@ -144,7 +146,7 @@ else:
 SAIGA_MODEL_NAME = "IlyaGusev/saiga2_7b_lora"
 SAIGA_BASE_MODEL_PATH = "TheBloke/Llama-2-7B-fp16"
 SAIGA_DEFAULT_MESSAGE_TEMPLATE = "<s>{role}\n{content}</s>\n"
-SAIGA_DEFAULT_SYSTEM_PROMPT = "Ты чат-бот «Мария» первой линии поддержки пользователей МФЦ. Твоя задача помогать людям и давать им необходимую информацию."
+SAIGA_DEFAULT_SYSTEM_PROMPT = "Ты - Мария. Онлайн помощник по вопросам первой линии поддержки для пользователей МФЦ."
 
 saiga_tokenizer = AutoTokenizer.from_pretrained(SAIGA_MODEL_NAME, use_fast=False)
 saiga_config = PeftConfig.from_pretrained(SAIGA_MODEL_NAME)
@@ -167,6 +169,7 @@ saiga_model = PeftModel.from_pretrained(
     offload_folder="./offload_pr",
     llm_int8_enable_fp32_cpu_offload=True
 )
+
 saiga_model.eval()
 saiga_generation_config = GenerationConfig.from_pretrained(SAIGA_MODEL_NAME)
 
@@ -179,6 +182,7 @@ classification_tokenizer = AutoTokenizer.from_pretrained(
     model_name, model_max_length=512
 )
 
+
 # Эндпоинт для генерации ответа с использованием Saiga
 @app.post("/saiga", response_model=OutputData)
 def generate_saiga_response(input_data: InputData):
@@ -190,12 +194,10 @@ def generate_saiga_response(input_data: InputData):
         [query_text], embed_model, embed_tokenizer, device
     )
     scores, indices = faiss_index.search(query_embedding.cpu().numpy(), 4)
-
-    # top k-nn
     top_result_idx = indices[0][0]
 
     # Создание запроса для Saiga
-    prompt = f"У меня есть вопрос: {client_request}. Также у меня есть ответ: {df.iloc[top_result_idx]['ANSWER']}. На основе этого ответа коротко ответь на исходный вопрос."
+    prompt = f"У меня есть вопрос: {client_request}. Также у меня есть ответ: {df.iloc[top_result_idx]['ANSWER']}. На основе этого ответа коротко ответь на исходный вопрос. И не забудь, ты - Мария. Онлайн помощник по вопросам первой линии поддержки для пользователей МФЦ."
     conversation = SaigaConversation(
         message_template=SAIGA_DEFAULT_MESSAGE_TEMPLATE,
         system_prompt=SAIGA_DEFAULT_SYSTEM_PROMPT,
@@ -216,5 +218,5 @@ def generate_saiga_response(input_data: InputData):
 @app.post("/classify", response_model=ClassificationOutputData)
 def classify_text_endpoint(input_data: ClassificationInputData):
     text = input_data.text
-    predicted_class_id = classify_text(text)
+    predicted_class_id = classify_text(text, threshold=0.1)
     return ClassificationOutputData(label=predicted_class_id)

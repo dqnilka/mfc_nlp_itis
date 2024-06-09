@@ -5,7 +5,7 @@ BERT_DIR = "results"
 
 
 def download_bert():
-    url_bert = "https://drive.google.com/drive/folders/155rpl9iMm_exQ9K_D7GA-PkNcbZGuy7e?usp=drive_link"
+    url_bert = "https://drive.google.com/drive/folders/1-0reMcH-PO689C5yLGfyZiAB6gY7LZPM?usp=sharing"
     gdown.download_folder(url_bert, output=BERT_DIR, use_cookies=False)
 
 
