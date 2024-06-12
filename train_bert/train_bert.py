@@ -28,11 +28,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class_weights = (1 - (df["labels"].value_counts().sort_index() / len(df))).values
 class_weights = torch.from_numpy(class_weights).float().to(device)
 
-
 class_weights
 
 from datasets import load_dataset, Dataset, ClassLabel
 import pandas as pd
+
 
 def get_dataset(csv_path, test_size=0.35, min_samples_per_class=2):
     full_dataset = load_dataset("csv", data_files=csv_path)["train"]
@@ -67,6 +67,7 @@ def get_dataset(csv_path, test_size=0.35, min_samples_per_class=2):
 
     return dataset
 
+
 dataset = get_dataset("../../../Downloads/data/data.csv")
 labels = sorted(df["labels"].value_counts().keys())
 
@@ -82,15 +83,16 @@ dataset
 
 tokenizer = AutoTokenizer.from_pretrained(model_name, model_max_length=512)
 
+
 def preprocess_function(examples):
     return tokenizer(examples["text_full"], truncation=True)
+
 
 tokenized_dataset = dataset.map(preprocess_function, batched=True)
 
 from transformers import DataCollatorWithPadding
 
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
-
 
 model = AutoModelForSequenceClassification.from_pretrained(
     model_name, num_labels=len(labels), id2label=id2label, label2id=label2id
@@ -113,6 +115,7 @@ lr_scheduler = get_scheduler(
     num_training_steps=num_training_steps,
 )
 
+
 class CustomTrainer(Trainer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -126,6 +129,7 @@ class CustomTrainer(Trainer):
         loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         self.loss_history.append(loss.item())
         return (loss, outputs) if return_outputs else loss
+
 
 f1_metric = evaluate.load("f1")
 
@@ -150,12 +154,14 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
 )
 
+
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
     return f1_metric.compute(
         predictions=predictions, references=labels, average="macro"
     )
+
 
 trainer = CustomTrainer(
     model=model,
@@ -175,7 +181,7 @@ steps_per_epoch = len(loss_history) // num_epochs
 
 # Пересчитываем средние значения потерь для каждой эпохи
 epoch_losses = [
-    sum(loss_history[i*steps_per_epoch:(i+1)*steps_per_epoch]) / steps_per_epoch
+    sum(loss_history[i * steps_per_epoch:(i + 1) * steps_per_epoch]) / steps_per_epoch
     for i in range(num_epochs)
 ]
 
@@ -189,7 +195,6 @@ plt.grid(True)
 plt.show()
 
 from tqdm import tqdm
-
 
 y_pred = []
 y_true = tokenized_dataset["test"]["labels"]
@@ -209,15 +214,15 @@ with torch.no_grad():
 
         y_pred.append(predicted_class_id)
 
-print(f1_score(y_true, y_pred, average="macro",zero_division=0))
-print(recall_score(y_true, y_pred, average="macro",zero_division=0))
-print(precision_score(y_true, y_pred, average="macro",zero_division=0))
+print(f1_score(y_true, y_pred, average="macro", zero_division=0))
+print(recall_score(y_true, y_pred, average="macro", zero_division=0))
+print(precision_score(y_true, y_pred, average="macro", zero_division=0))
 
-print(classification_report(y_true, y_pred,zero_division=0))
+print(classification_report(y_true, y_pred, zero_division=0))
 
 from google.colab import drive
+
 drive.mount('/content/drive')
 #
 # # Копирование файлов на Google Drive
 # !cp -r /content/results /content/drive/MyDrive/
-

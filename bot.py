@@ -1,17 +1,15 @@
-import asyncio  # Импорт модуля asyncio для асинхронного программирования
-from telebot.async_telebot import AsyncTeleBot  # Импорт асинхронного бота для Telegram
-from telebot import types  # Импорт типов для работы с Telegram API
-from dotenv import load_dotenv  # Импорт функции для загрузки переменных окружения из файла .env
-import os  # Импорт модуля os для работы с переменными окружения
-import requests  # Импорт библиотеки requests для выполнения HTTP-запросов
-from src.utils import answer_with_label  # Импорт утилиты для обработки ответов
-import logging  # Импорт модуля для логирования
-import psycopg2  # Импорт библиотеки для работы с PostgreSQL
+import asyncio
+from telebot.async_telebot import AsyncTeleBot
+from telebot import types
+from dotenv import load_dotenv
+import os
+import requests
+from src.utils import answer_with_label
+import logging
+import psycopg2
 
-# Загрузка переменных окружения из файла .env
 load_dotenv()
 
-# Определение переменных окружения
 PORT = "8080"
 db_host = os.getenv("DB_HOST")
 db_name = os.getenv("DB_NAME")
@@ -20,14 +18,11 @@ db_password = os.getenv("DB_PASSWORD")
 URL = os.getenv("URL")
 token = os.getenv("API_TOKEN")
 
-# Настройка логирования
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename="bot.log", encoding="utf-8", level=logging.DEBUG)
 
-# Инициализация асинхронного бота с токеном
 bot = AsyncTeleBot(token)
 
-# Создание клавиатуры с кнопками для оценки
 kb = types.InlineKeyboardMarkup(
     [
         [
@@ -41,22 +36,19 @@ kb = types.InlineKeyboardMarkup(
 )
 
 
-# Функция для сохранения оценки в базу данных
 def save_rating_to_db(user_name, rating, user_message, output_message):
     try:
-        # Подключение к базе данных PostgreSQL
+
         conn = psycopg2.connect(
             host=db_host, database=db_name, user=db_user, password=db_password
         )
         cur = conn.cursor()
 
-        # Вставка данных в таблицу statistics
         cur.execute(
             "INSERT INTO statistics (user_name, rating, message, output_message) VALUES (%s, %s, %s,  %s)",
             (user_name, rating, user_message, output_message),
         )
 
-        # Фиксация изменений и закрытие подключения
         conn.commit()
         cur.close()
         conn.close()
@@ -64,7 +56,6 @@ def save_rating_to_db(user_name, rating, user_message, output_message):
         print("Ошибка при сохранении оценки в базу данных:", error)
 
 
-# Обработчик команды /start
 @bot.message_handler(commands=["start"])
 async def send_welcome(message):
     await bot.reply_to(
@@ -76,19 +67,17 @@ async def send_welcome(message):
     )
 
 
-# Обработчик всех текстовых сообщений
 @bot.message_handler(func=lambda message: True)
 async def message(message):
     logger.info(f"New message: {message.text}")
 
-    # Запрос на классификацию текста
     res_class = requests.post(f"{URL}/classify", json={"text": message.text})
 
     if res_class.status_code == 200:
         label = res_class.json()["label"]
 
         if label != 111:
-            # Запрос на генерацию ответа
+
             res_saiga = requests.post(f"{URL}/saiga", json={"text": message.text})
 
             if res_saiga.status_code == 200:
@@ -109,7 +98,6 @@ async def message(message):
         await bot.reply_to(message, "Произошла ошибка при обработке запроса.")
 
 
-# Обработчик нажатий на кнопки оценки
 @bot.callback_query_handler(func=lambda call: True)
 async def callback_worker(call):
     rating = call.data.split("_")[2]
@@ -125,5 +113,4 @@ async def callback_worker(call):
     await bot.send_message(call.from_user.id, "Спасибо за вашу оценку!")
 
 
-# Запуск бота
 asyncio.run(bot.polling())
